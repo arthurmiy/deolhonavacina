@@ -7,15 +7,13 @@ class NameValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         SelectableText(name,
             style: TextStyle(
                 fontFamily: 'SourceSansPro', fontWeight: FontWeight.bold)),
-        SizedBox(
-          width: 5,
-        ),
         SelectableText(value, style: TextStyle(fontFamily: 'SourceSansPro')),
       ],
     );

@@ -8,7 +8,9 @@ import 'package:deolhonafila/interface/widgets/simple_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 // import 'package:geocoding/geocoding.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,6 +32,7 @@ class _HomePageState extends State<HomePage> {
     "Status da fila": "",
     "Tipo de segunda dose": ""
   };
+  String lastUpdate = "";
 
   //filter data
   void filterData() {
@@ -162,9 +165,11 @@ class _HomePageState extends State<HomePage> {
       //retrieve complete list
       lista = List<Posto>.from(parsedListJson.map((i) => Posto.fromJson(i)));
       filterData();
+      DateTime now = DateTime.now();
+      lastUpdate = DateFormat('d/M/y - H:m:s').format(now);
       // fillList();
     } else {
-      throw Exception('Failed to load album');
+      throw Exception('Failed to load ');
     }
   }
 
@@ -191,92 +196,175 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Center(
-          child: loading
-              ? CircularProgressIndicator()
-              : Container(
-                  constraints: BoxConstraints(maxWidth: 800),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Text(
-                          "Pesquisar postos de vacinação",
-                          style: Theme.of(context).textTheme.headline4,
-                        ),
-                      ),
-                      SearchMenu(fList, filter, (value) {
-                        filter = value;
+    return SafeArea(
+      child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            showAboutDialog(
+              context: context,
+              applicationVersion: '''Contato: r2aplicativos@gmail.com''',
+              applicationName: 'De olho na fila versão busca (v1.1)',
+              applicationLegalese:
+                  '''Site criado para facilitar a procura de postos de vacinação e disponibilidade de segunda dose. Todos os dados são obtidos diretamente do site oficial https://deolhonafila.prefeitura.sp.gov.br/
+                    Modo de uso:
+                     1-Filtre os resultados de acordo com os campos disponíveis
+                     2-Visualize os resultados no mapa
+                     3-Clique sobre um posto para visualizar as informações
+                     4-Os marcadores do mapa variam de cor de acordo com o status da fila e de funcionamento
+                     5-Os marcadores também apresentam a disponibilidade da vacina (as iniciais ficam verdes quando há disponibilidade)
+                    
+                    Lembre-se de sempre conferir o horário da última atualização!
+                    ''',
+            );
+          },
+          child: Icon(Icons.info_outline),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Center(
+            child: loading
+                ? CircularProgressIndicator()
+                : LayoutBuilder(builder: (context, constraints) {
+                    double totalHeight = constraints.maxHeight;
+                    if (totalHeight < 1200) {
+                      totalHeight = 1200;
+                    }
 
-                        filterData();
-                        setState(() {});
-                      }),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton(
-                              onPressed: () async {
-                                loading = true;
-                                setState(() {});
-                                await reset();
-                                setState(() {
-                                  loading = false;
-                                });
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.refresh),
-                                    SizedBox(
-                                      width: 10,
+                    return SingleChildScrollView(
+                      child: Container(
+                        height: totalHeight,
+                        constraints: BoxConstraints(maxWidth: 800),
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 505,
+                              child: Column(
+                                children: [
+                                  FittedBox(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20.0),
+                                      child: Text(
+                                        "Pesquisar postos de vacinação",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headline4,
+                                      ),
                                     ),
-                                    Text('Limpar e atualizar'),
-                                  ],
-                                ),
-                              )),
-                          ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).pushNamed(MapView.route);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.map_outlined),
-                                    SizedBox(
-                                      width: 10,
+                                  ),
+                                  FittedBox(
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        await canLaunch(
+                                                "https://deolhonafila.prefeitura.sp.gov.br/")
+                                            ? await launch(
+                                                "https://deolhonafila.prefeitura.sp.gov.br/")
+                                            : throw 'Could not launch https://deolhonafila.prefeitura.sp.gov.br/';
+                                      },
+                                      child: Text(
+                                        'Dados obtidos do site https://deolhonafila.prefeitura.sp.gov.br/ em $lastUpdate',
+                                        style:
+                                            Theme.of(context).textTheme.caption,
+                                      ),
                                     ),
-                                    Text('Ver no mapa'),
-                                  ],
-                                ),
-                              )),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      Expanded(
-                        child: ListView.builder(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: fList.length,
-                          shrinkWrap: true,
-                          itemBuilder: (BuildContext context, int index) {
-                            return SimpleTile(fList[index]);
-                          },
+                                  ),
+                                  SearchMenu(lista, filter, (value) {
+                                    filter = value;
+
+                                    filterData();
+                                    setState(() {});
+                                  }),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Expanded(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: ElevatedButton(
+                                              onPressed: () async {
+                                                loading = true;
+                                                setState(() {});
+                                                await reset();
+                                                setState(() {
+                                                  loading = false;
+                                                });
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Icon(Icons.refresh),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text('Limpar e atualizar'),
+                                                  ],
+                                                ),
+                                              )),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Expanded(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.of(context)
+                                                    .pushNamed(MapView.route);
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Icon(Icons.map_outlined),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text('   Ver no mapa    '),
+                                                  ],
+                                                ),
+                                              )),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: fList.length == 0
+                                  ? Text('Sem correspondências')
+                                  : ListView.builder(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      itemCount: fList.length,
+                                      shrinkWrap: true,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return SimpleTile(fList[index]);
+                                      },
+                                    ),
+                            )
+                          ],
                         ),
-                      )
-                    ],
-                  ),
-                ),
+                      ),
+                    );
+                  }),
+          ),
         ),
       ),
     );

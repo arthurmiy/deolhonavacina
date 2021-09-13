@@ -15,7 +15,7 @@ class SimpleTile extends ListTile {
             NameValue('Tipo: ', posto.type),
             NameValue('Região: ', posto.Region),
             NameValue('Status: ', posto.queueStatusStr),
-            NameValue('Última Atualização:', posto.time),
+            NameValue('Atualizado em:', posto.time),
           ]),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
