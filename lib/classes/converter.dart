@@ -338,6 +338,7 @@ final Map<String, LatLon> converter = {
       new LatLon(-23.486717199999998, -46.6553196),
   "UBS CASA VERDE / PARÓQUIA NOSSA SENHORA DAS DORES":
       new LatLon(-23.505131000000002, -46.6613109),
+  "UBS CASA VERDE": new LatLon(-23.504875912395725, -46.659943301782306),
   "UBS CASA VERDE ALTA": new LatLon(-23.4893873, -46.6644893),
   "UBS DR. WALTER ELIAS - CASA VERDE BAIXA":
       new LatLon(-23.5094557, -46.663970299999995),
@@ -724,6 +725,7 @@ final Map<String, LatLon> converter = {
   "IGREJA DE SÃO JUDAS": new LatLon(-23.6269398, -46.6431091),
   "SHOPPING METRÔ SANTA CRUZ": new LatLon(-23.599013799999998, -46.6369018),
   "TCMSP (DRIVE-THRU E WALK)": new LatLon(-23.5971965, -46.6522171),
+  "UBS VILA TEREZINHA ": new LatLon(-23.45841284857789, -46.696616159455246),
 };
 
 class LatLon {
@@ -739,8 +741,17 @@ ValueChanged<Posto> callbackIcon = (value) {};
 Map<int, Color> colorConverter = {
   0: Colors.green,
   1: Colors.green, //sem fila
-  2: Colors.cyanAccent, //fila pequena
+  2: Colors.yellow, //fila pequena
   3: Colors.orange, //fila média
   4: Colors.red, //fila grande
   5: Colors.grey, //não funcionando
+  -1: Colors.black
+};
+
+Map<String, IconData> iconConverter = {
+  'POSTO VOLANTE': Icons.add_location_outlined,
+  'POSTO FIXO': Icons.local_hospital_rounded,
+  'PARQUES': Icons.nature_people,
+  'MEGAPOSTO': Icons.account_balance,
+  'DRIVE-THRU': Icons.drive_eta,
 };

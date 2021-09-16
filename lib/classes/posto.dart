@@ -35,21 +35,21 @@ class Posto {
 
   factory Posto.fromJson(Map<String, dynamic> json) {
     return Posto(
-        json['equipamento'],
-        json['endereco'],
-        json['tipo_posto'],
-        int.parse(json['id_tipo_posto']),
-        int.parse(json['id_distrito']),
-        json['distrito'],
+        json['equipamento'] ?? '',
+        json['endereco'] ?? '',
+        json['tipo_posto'] ?? '',
+        int.parse(json['id_tipo_posto'] ?? '-1'),
+        int.parse(json['id_distrito'] ?? '-1'),
+        json['distrito'] ?? '',
         int.parse(json['id_crs']),
-        json['crs'],
-        json['data_hora'],
-        int.parse(json['indice_fila']),
-        json['status_fila'],
+        json['crs'] ?? '',
+        json['data_hora'] ?? '',
+        int.parse(json['indice_fila'] ?? '-1'),
+        json['status_fila'] ?? 'Não informado',
         json['coronavac'] == "1",
         json['astrazeneca'] == "1",
         json['pfizer'] == "1",
-        int.parse(json['id_tb_unidades']));
+        int.parse(json['id_tb_unidades'] ?? '-1'));
   }
 
   String getParameterByLabel(String label) {

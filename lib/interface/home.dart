@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                   padding: EdgeInsets.symmetric(vertical: 0.1, horizontal: 0.1),
                   iconSize: 30,
                   icon: Icon(
-                    Icons.local_hospital_rounded,
+                    iconConverter[iTmp.type] ?? Icons.local_hospital_rounded,
                     color: colorConverter[iTmp.queueStatus] ?? Colors.black,
                   ),
                   onPressed: () {
